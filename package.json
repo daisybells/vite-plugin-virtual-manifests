@@ -1,8 +1,12 @@
 {
     "name": "vite-plugin-virtual-manifests",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "description": "Vite plugin that generates JSON manifests based off of the contents of an input file path or directory.",
     "main": "index.js",
+    "exports": {
+        "import": "./index.js",
+        "require": "./index.cjs"
+    },
     "keywords": [
         "manifest",
         "virtual",
@@ -18,5 +22,8 @@
     "bugs": {
         "url": "https://github.com/daisybells/vite-plugin-virtual-manifests/issues"
     },
-    "homepage": "https://github.com/daisybells/vite-plugin-virtual-manifests#readme"
+    "homepage": "https://github.com/daisybells/vite-plugin-virtual-manifests#readme",
+    "devDependencies": {
+        "rollup": "^4.52.2"
+    }
 }
