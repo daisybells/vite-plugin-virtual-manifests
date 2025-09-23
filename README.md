@@ -37,7 +37,7 @@ pnpm add -D vite-plugin-virtual-manifests
 
 ```
 import { defineConfig } from 'vite';
-import viteManifestBuilder from 'vite-plugin-manifest-builder';
+import viteVirtualManifests from 'vite-plugin-virtual-manifests';
 import path from 'node:path';
 import fs from "node:fs/promises"
 
@@ -57,7 +57,7 @@ async function generateAssetManifest(directory) {
 
 export default defineConfig({
   plugins: [
-    viteManifestBuilder({
+    viteVirtualManifests({
       manifests: [
         {
           name: 'assets',
