@@ -5,8 +5,9 @@ const VIRTUAL_MODULE_PREFIX = "virtual:manifests/";
 const RESOLVED_VIRTUAL_MODULE_PREFIX = `\0${VIRTUAL_MODULE_PREFIX}`;
 
 const defaultOptions = {
-    outputDirectory: path.join(process.cwd(), ".manifests"),
+    outputDirectory: ".manifests",
     cacheManifests: true,
+    rootDirectory: null,
 };
 
 /**
@@ -29,7 +30,11 @@ const defaultOptions = {
  * Vite plugin that generates JSON manifests based off of the contents of an input
  * file path.
  * @param {Object} inputOptions - Configurable options for manifest generator.
- * @param {string} [inputOptions.outputDirectory = path.join(process.cwd(), ".manifests")] - Directory to save
+ *
+ * @param {import("node:fs").PathLike} [inputOptions.rootDirectory] - full path to root directory,
+ * if different from config.root
+ *
+ * @param {string} [inputOptions.outputDirectory = ".manifests"] - Directory to save
  * manifests into for external use.
  * @param {Boolean} [inputOptions.cacheManifests = true] - Defines whether or not to save manifests directly to disk.
  * @param {Object[]} inputOptions.manifests - List of manifest files set to be generated as well as
@@ -57,30 +62,44 @@ function viteVirtualManifests(inputOptions = {}) {
         ...defaultOptions,
         ...inputOptions,
     };
-    const { manifests, outputDirectory, cacheManifests } = options;
+    const { manifests, outputDirectory, cacheManifests, rootDirectory } =
+        options;
 
     const manifestArray = Array.isArray(manifests) ? manifests : [];
 
-    const resolvedManifests = manifestArray.map((manifest) => {
-        const { watchDir, watchIgnore, name } = manifest;
-        const ignores = watchIgnore || [];
-        const ignoresArray = Array.isArray(ignores) ? ignores : [ignores];
-
-        return {
-            ...manifest,
-            watchDir: watchDir ? path.resolve(watchDir) : null,
-            watchIgnore: ignoresArray.map((filePath) => path.resolve(filePath)),
-            output: path.resolve(outputDirectory, `${name}.json`),
-        };
-    });
-
-    let command;
+    let resolvedManifests;
+    let config;
 
     return {
         name: "vite-plugin-virtual-manifests",
         enforce: "pre",
-        configResolved(config) {
-            ({ command } = config);
+        configResolved(resolvedConfig) {
+            config = resolvedConfig;
+            const { root } = resolvedConfig;
+            const resolvedRoot = rootDirectory ?? root;
+
+            resolvedManifests = manifestArray.map((manifest) => {
+                const { watchDir, watchIgnore, name } = manifest;
+                const ignores = watchIgnore || [];
+                const ignoresArray = Array.isArray(ignores)
+                    ? ignores
+                    : [ignores];
+
+                return {
+                    ...manifest,
+                    watchDir: watchDir
+                        ? path.resolve(resolvedRoot, watchDir)
+                        : null,
+                    watchIgnore: ignoresArray.map((filePath) =>
+                        path.resolve(resolvedRoot, filePath)
+                    ),
+                    output: path.resolve(
+                        resolvedRoot,
+                        outputDirectory,
+                        `${name}.json`
+                    ),
+                };
+            });
         },
         resolveId(id) {
             if (id.startsWith(VIRTUAL_MODULE_PREFIX))
@@ -109,7 +128,7 @@ function viteVirtualManifests(inputOptions = {}) {
                     const transformedData = transformData(
                         data,
                         transform,
-                        command
+                        config.command
                     );
 
                     return `export default ${JSON.stringify(

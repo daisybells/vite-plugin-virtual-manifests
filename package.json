@@ -1,11 +1,14 @@
 {
     "name": "vite-plugin-virtual-manifests",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Vite plugin that generates JSON manifests based off of the contents of an input file path or directory.",
     "main": "index.js",
     "exports": {
         "import": "./index.js",
         "require": "./index.cjs"
+    },
+    "scripts": {
+        "build:cjs": "rollup -c"
     },
     "keywords": [
         "manifest",

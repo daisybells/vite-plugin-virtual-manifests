@@ -9,3 +9,5 @@ Desktop.ini
 Thumbs.db
 
 /node_modules
+
+rollup.config.js

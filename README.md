@@ -86,11 +86,12 @@ The plugin is configured with a single `options` object.
 
 `viteVirtualManifests(options)`
 
-| **Option**        | **Type**        | **Default**                             | **Description**                                                |
-| ----------------- | --------------- | --------------------------------------- | -------------------------------------------------------------- |
-| `outputDirectory` | `string`        | `path.join(proces.cwd(), ".manifests")` | The directory where manifests will be cached to disk.          |
-| `cacheManifests`  | `boolean`       | `true`                                  | When `true`, manifests are saved to disk during build process. |
-| `manifests`       | `Array<Object>` | `(required)`                            | An array of manifest configurations.                           |
+| **Option**        | **Type**        | **Default**    | **Description**                                                |
+| ----------------- | --------------- | -------------- | -------------------------------------------------------------- |
+| `outputDirectory` | `string`        | `".manifests"` | The directory where manifests will be cached to disk.          |
+| `rootDirectory`   | `string`        | `null`         | Project root, if different from that in your vite.config.js    |
+| `cacheManifests`  | `boolean`       | `true`         | When `true`, manifests are saved to disk during build process. |
+| `manifests`       | `Array<Object>` | `(required)`   | An array of manifest configurations.                           |
 
 `options.manifests`
 
