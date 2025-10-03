@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-var path = require('node:path');
-var fs = require('node:fs/promises');
+var path = require("node:path");
+var fs = require("node:fs/promises");
 
 const VIRTUAL_MODULE_PREFIX = "virtual:manifests/";
 const RESOLVED_VIRTUAL_MODULE_PREFIX = `\0${VIRTUAL_MODULE_PREFIX}`;
@@ -190,7 +190,7 @@ function transformData(data, transformOptions, command) {
 
     if (!jsonTransform || !shouldApply) return data;
 
-    console.log(`Applying transform for "${command}" time`);
+    console.log(`\nApplying transform for "${command}" time`);
 
     return jsonTransform(data);
 }
@@ -206,7 +206,7 @@ function handleFileChangeCurry(server, manifests) {
             if (!isWithinDirectory || isIgnored) continue;
 
             console.log(
-                `\n Change detected in ${manifest.name}. Regenerating...`
+                `\nChange detected in ${manifest.name}. Regenerating...`
             );
 
             const resolveId = `${RESOLVED_VIRTUAL_MODULE_PREFIX}${manifest.name}`;
@@ -216,7 +216,7 @@ function handleFileChangeCurry(server, manifests) {
             server.moduleGraph.invalidateModule(module);
             server.ws.send({ type: "full-reload", path: "*" });
             console.log(
-                `\n♻️ Virtual module "${VIRTUAL_MODULE_PREFIX}${manifest.name}" invalidated. Page will reload.`
+                `\n♻️Virtual module "${VIRTUAL_MODULE_PREFIX}${manifest.name}" invalidated. Page will reload.`
             );
             return;
         }
@@ -230,7 +230,7 @@ async function generateManifestCache(manifest) {
         const data = await generate(watchDir);
         await fs.mkdir(path.dirname(output), { recursive: true });
         await fs.writeFile(output, JSON.stringify(data, null, 2));
-        console.log(`\n ✅ ${name} manifest written to ${output}`);
+        console.log(`\n✅ ${name} manifest written to ${output}`);
     } catch (error) {
         console.error(`\n ❌ Error generating manifest [${name}]: ${error}`);
     }
