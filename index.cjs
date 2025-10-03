@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var path = require("node:path");
-var fs = require("node:fs/promises");
+var path = require('node:path');
+var fs = require('node:fs/promises');
 
 const VIRTUAL_MODULE_PREFIX = "virtual:manifests/";
 const RESOLVED_VIRTUAL_MODULE_PREFIX = `\0${VIRTUAL_MODULE_PREFIX}`;
@@ -167,7 +167,7 @@ function viteVirtualManifests(inputOptions = {}) {
                     directory.startsWith(publicDir) ||
                     directory.startsWith(root);
                 if (!isWatched) {
-                    console.log("Adding watcher");
+                    logMessage(`Adding ${directory} to watcher...`);
                     server.watcher.add(directory);
                 }
             }
@@ -190,8 +190,7 @@ function transformData(data, transformOptions, command) {
 
     if (!jsonTransform || !shouldApply) return data;
 
-    console.log(`\nApplying transform for "${command}" time`);
-
+    logMessage(`Applying transform for command '${command}'.`, "processing");
     return jsonTransform(data);
 }
 
@@ -205,8 +204,9 @@ function handleFileChangeCurry(server, manifests) {
 
             if (!isWithinDirectory || isIgnored) continue;
 
-            console.log(
-                `\nChange detected in ${manifest.name}. Regenerating...`
+            logMessage(
+                `Change detected in ${manifest.name}. Regenerating...`,
+                "processing"
             );
 
             const resolveId = `${RESOLVED_VIRTUAL_MODULE_PREFIX}${manifest.name}`;
@@ -215,8 +215,11 @@ function handleFileChangeCurry(server, manifests) {
 
             server.moduleGraph.invalidateModule(module);
             server.ws.send({ type: "full-reload", path: "*" });
-            console.log(
-                `\n♻️Virtual module "${VIRTUAL_MODULE_PREFIX}${manifest.name}" invalidated. Page will reload.`
+
+            logMessage(
+                `Virtual module "${VIRTUAL_MODULE_PREFIX}${manifest.name}" invalidated. Page will reload.`,
+                "custom",
+                "♻️"
             );
             return;
         }
@@ -230,9 +233,9 @@ async function generateManifestCache(manifest) {
         const data = await generate(watchDir);
         await fs.mkdir(path.dirname(output), { recursive: true });
         await fs.writeFile(output, JSON.stringify(data, null, 2));
-        console.log(`\n✅ ${name} manifest written to ${output}`);
+        logMessage(`'${name}' manifest written to ${output}`, "success");
     } catch (error) {
-        console.error(`\n ❌ Error generating manifest [${name}]: ${error}`);
+        logMessage(`Error generating manifest '${name}': ${error}`, "error");
     }
 }
 
@@ -253,6 +256,26 @@ function returnTopLevelPaths(filePathArray) {
         []
     );
     return topLevelDirectories;
+}
+
+function logMessage(message, type, customLabel = "") {
+    const PLUGIN_PREFIX = "\n[vite-plugin-virtual-manifests]";
+    const typeMapEntries = {
+        success: "✅",
+        error: "❌",
+        reload: "🔄",
+        processing: "🟡",
+    };
+
+    const messageLabel =
+        type === "custom" ? customLabel.trim() : typeMapEntries[type];
+
+    const outputMessage = messageLabel
+        ? `${PLUGIN_PREFIX} ${messageLabel} ${message}`
+        : `${PLUGIN_PREFIX} ${message}`;
+
+    if (type === "error") console.error(outputMessage);
+    else console.log(outputMessage);
 }
 
 module.exports = viteVirtualManifests;
