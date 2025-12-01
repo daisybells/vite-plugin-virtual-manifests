@@ -9,5 +9,7 @@ Desktop.ini
 Thumbs.db
 
 /node_modules
+package-lock.json
+pnpm-lock.yaml
 
 rollup.config.js
